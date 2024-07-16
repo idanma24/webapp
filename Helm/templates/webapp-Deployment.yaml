@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-deployment-{{ .Values.env }}
+  labels:
+    app: webapp
+    env: {{ .Values.env }}
+    app.kubernetes.io/managed-by: "Helm"
+  annotations:
+    meta.helm.sh/release-name: "webapp-deployment-{{ .Values.env }}"
+    meta.helm.sh/release-namespace: "default"
+spec:
+  replicas: {{ if eq .Values.env "production" }} 3 {{ else }} 1 {{ end }}
+  selector:
+    matchLabels:
+      app: webapp
+      env: {{ .Values.env }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: webapp
+        env: {{ .Values.env }}
+    spec:
+      containers:
+      - name: webapp
+        image: nanajanashia/k8s-demo-app:v1.0
+        ports:
+        - containerPort: 3000
+        env:
+        - name: USER_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret-{{ .Values.env }}
+              key: mongo-user
+        - name: USER_PWD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret-{{ .Values.env }}
+              key: mongo-password
+        - name: DB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: mongo-config-{{ .Values.env }}
+              key: mongo-url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service-{{ .Values.env }}
+  labels:
+    env: {{ .Values.env }}
+    app.kubernetes.io/managed-by: "Helm"
+  annotations:
+    meta.helm.sh/release-name: "webapp-deployment-{{ .Values.env }}"
+    meta.helm.sh/release-namespace: "default"
+spec:
+  type: NodePort
+  selector:
+    app: webapp
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+      nodePort: {{ if eq .Values.env "production" }} 30200 {{ else }} 30100 {{ end }}

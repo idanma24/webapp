@@ -1,0 +1,6 @@
+env: staging
+hpa:
+  minReplicas: 1
+  maxReplicas: 5
+  cpuUtilization: 80
+  memoryUtilization: 75

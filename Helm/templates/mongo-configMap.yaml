@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-config-{{ .Values.env }}
+  labels:
+    env: {{ .Values.env }}
+    app.kubernetes.io/managed-by: "Helm"
+  annotations:
+    meta.helm.sh/release-name: "webapp-deployment-{{ .Values.env }}"
+    meta.helm.sh/release-namespace: "default"
+data:
+  mongo-url: mongo-service-{{ .Values.env }}

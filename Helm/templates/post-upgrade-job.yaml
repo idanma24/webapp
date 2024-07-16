@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: webapp-post-upgrade-{{ .Release.Revision }}
+  annotations:
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: webapp-post-upgrade
+      labels:
+        app: webapp-post-upgrade
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: pre-upgrade-hook
+        image: fedora
+        command:
+          - /tmp/notify.sh
+          - "{{ .Values.env }}"
+          - "{{ .Release.Revision }}"
+        volumeMounts:
+          - mountPath: /tmp
+            name: webapp-post-upgrade-script
+      volumes:
+        - name: webapp-post-upgrade-script
+          configMap:
+            name: webapp-post-upgrade-script
+            defaultMode: 0777

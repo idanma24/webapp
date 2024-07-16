@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: webapp-argo-application
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://gitlab.com/idanmanzur/argocd-app.git
+    targetRevision: HEAD
+    path: argocd-webapp
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: webapp
+
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true

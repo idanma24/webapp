@@ -1,0 +1,6 @@
+env: production
+hpa:
+  minReplicas: 4
+  maxReplicas: 10
+  cpuUtilization: 80
+  memoryUtilization: 75
